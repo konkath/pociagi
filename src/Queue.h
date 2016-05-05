@@ -8,13 +8,22 @@
 #ifndef QUEUE_H_
 #define QUEUE_H_
 
+#include <curses.h>
+#include <Graphics.h>
+#include <string>
+using namespace std;
+
 class Queue{
 public:
-	Queue(int x0, int y0, int x1, int y1);
+	Queue();
 	~Queue();
+
+	void addPeople();
+	void removePeople();
 protected:
 private:
-
+	WINDOW* queWindow;
+	int people;
 };
 
 

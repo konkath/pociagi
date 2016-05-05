@@ -13,13 +13,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>                  /*  for sleep()  */
-#include <curses.h>
 
-
+#include <Graphics.h>
+#include <Queue.h>
+#include <Booths.h>
 int main(void) {
 
     WINDOW * mainwin;
-
+    //disable cursor
 
     /*  Initialize ncurses  */
 
@@ -28,25 +29,35 @@ int main(void) {
 	exit(EXIT_FAILURE);
     }
 
+    curs_set(0);
 
-    /*  Display "Hello, world!" in the centre of the
-	screen, call refresh() to show our changes, and
-	sleep() for a few seconds to get the full screen effect  */
-
-    mvaddstr(13, 33, "Hello, world!");
+    mvaddstr(0, COLS/2, "PKP");
     refresh();
 
-    WINDOW * smallwin;
-    smallwin = newwin(20, 20, 20, 20);
-    box(smallwin, '|', '-');
-	touchwin(smallwin);
-	wrefresh(smallwin);
+    Queue que = Queue();
+    Booths booths = Booths();
 
-    getchar();
+    int pressedKey = getch();
+    while(pressedKey != 27 ){
+    	switch(pressedKey)
+    	{
+    	//spacja dodanie ludzi do kolejki
+    	case 32:
+    		que.addPeople();
+    		break;
+    	//+ dodanie budki z biletami
+    	case 43:
+    		booths.addBooth();
+    		break;
+    	//- usuniecie budki z biletami
+    	case 45:
+    		booths.removeBooth();
+    		break;
+    	}
 
-    /*  Clean up after ourselves  */
+    	pressedKey = getch();
+    }
 
-    delwin(smallwin);
     delwin(mainwin);
     endwin();
     refresh();
