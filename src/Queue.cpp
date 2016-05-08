@@ -8,9 +8,13 @@
 #include <Queue.h>
 
 Queue::Queue(){
-	Graphics::createWindow(queWindow, 10, 10, LINES - 10, COLS - 10);
-	Graphics::createBox(queWindow, '$', '$');
 	people = 0;
+	int lines = LINES * 0.4;
+	int columns = COLS * 0.1;
+
+	Graphics::createWindow(queWindow, lines, columns, LINES - lines,
+							COLS - columns);
+	Graphics::createBox(queWindow, '$', '$');
 }
 
 Queue::~Queue(){

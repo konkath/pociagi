@@ -12,16 +12,16 @@
 
 class Booth{
 public:
-	Booth(int id, WINDOW*& parent);
+	Booth(int id);
 	~Booth();
 
-	void reportStatus();
 protected:
 private:
-	int id;
 	WINDOW* winBooth;
 	bool free;
 	int timerMS;
+
+	void reportStatus();
 };
 
 

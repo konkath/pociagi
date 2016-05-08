@@ -14,10 +14,8 @@ using namespace std;
 
 class Graphics{
 public:
-	static void createWindow(WINDOW*& win, int height, int width, int xStart, int yStart);
+	static void createWindow(WINDOW*& win, int nLines, int nColumns, int yStart, int xStart);
 	static void deleteWindow(WINDOW*& win);
-
-	static void createChildWindow(WINDOW*& win, WINDOW*& parent, int height, int width, int xStart, int yStart);
 
 	static void createBox(WINDOW*& win, chtype vertical, chtype horizontal);
 	static void showInMiddle(WINDOW*& win, string txt);

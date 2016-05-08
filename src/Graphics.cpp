@@ -8,19 +8,18 @@
 #include <Graphics.h>
 #include <iostream>
 
-void Graphics::createWindow(WINDOW*& win, int height, int width, int xStart, int yStart){
-	win = newwin(height, width, xStart, yStart);
-	touchwin(win);
-	wrefresh(win);
-}
-
-void Graphics::createChildWindow(WINDOW*& win, WINDOW*& parent, int height, int width, int xStart, int yStart){
-	win = derwin(parent, height, width, xStart, yStart);
+void Graphics::createWindow(WINDOW*& win, int nLines, int nColumns, int yStart, int xStart){
+	win = newwin(nLines, nColumns, yStart, xStart);
 	touchwin(win);
 	wrefresh(win);
 }
 
 void Graphics::deleteWindow(WINDOW*& win){
+	//delete border as it likes to stay on screen
+	wborder(win, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
+	werase(win);
+	wrefresh(win);
+
 	delwin(win);
 	refresh();
 }

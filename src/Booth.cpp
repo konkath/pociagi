@@ -6,15 +6,20 @@
  */
 
 #include <Booth.h>
+#include <iostream>
 
-
-	Booth::Booth(int id, WINDOW*& parent):id(id){
+	Booth::Booth(int id){
 		free = true;
 		timerMS = 500;
 
-		//TODO zle podawana parametry sa
-		// (parent, nlines, ncols, begin_y, begin_x)
-		Graphics::createChildWindow(winBooth, parent, 0, 0, COLS, LINES);
+		int lines = LINES * 0.20;
+		int parentLines = LINES * 0.65;
+		int columns = COLS * 0.18;
+		int orgDistance = COLS * 0.33;
+
+		Graphics::createWindow(winBooth, lines, columns,
+								(LINES - parentLines) + (lines * id),
+								COLS - orgDistance);
 		Graphics::createBox(winBooth, '#', '#');
 	}
 
