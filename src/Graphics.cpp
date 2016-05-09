@@ -14,6 +14,15 @@ void Graphics::createWindow(WINDOW*& win, int nLines, int nColumns, int yStart, 
 	wrefresh(win);
 }
 
+void Graphics::createDerWindow(WINDOW*& win, WINDOW*& parent,
+		int nLines, int nColumns, int yStart, int xStart){
+
+	win = derwin(parent, nLines, nColumns, yStart, xStart);
+	touchwin(win);
+	wrefresh(win);
+}
+
+
 void Graphics::deleteWindow(WINDOW*& win){
 	//delete border as it likes to stay on screen
 	wborder(win, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
@@ -29,11 +38,34 @@ void Graphics::createBox(WINDOW*& win, chtype vertical, chtype horizontal){
 	wrefresh(win);
 }
 
+void Graphics::setColor(WINDOW*& win, int color){
+	wbkgd(win, COLOR_PAIR(color));
+	wrefresh(win);
+}
+
 void Graphics::showInMiddle(WINDOW*& win, string txt){
 	int row, col;
 	getmaxyx(win, row, col);
 
-	mvwaddstr(win, row/2, col/2, txt.c_str());
+	mvwaddstr(win, row / 2, col / 2 - txt.length() / 2, txt.c_str());
+
+	wrefresh(win);
+}
+
+
+void Graphics::showOnTop(WINDOW*& win, string txt){
+	int col = getmaxx(win);
+
+	mvwaddstr(win, 2, col / 2 - txt.length() / 2, txt.c_str());
+
+	wrefresh(win);
+}
+
+void Graphics::showOnBottom(WINDOW*& win, string txt){
+	int row, col;
+	getmaxyx(win, row, col);
+
+	mvwaddstr(win, row - 2, col / 2 - txt.length() / 2, txt.c_str());
 
 	wrefresh(win);
 }

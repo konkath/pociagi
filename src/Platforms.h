@@ -10,16 +10,37 @@
 
 #include <curses.h>
 #include <Graphics.h>
+#include <Train.h>
+#include <queue>
+#include <SignalLight.h>
+
 
 class Platforms{
 public:
-	Platforms();
+	Platforms(SignalLight* signal);
 	~Platforms();
+
+	void addTrain(int idx);
+	void removeTrain(int idx);
+
+	void addPeople(int idx);
+	bool removePeople(int idx);
+
 protected:
 private:
 	const int nOfPlatforms = 2;
+	const int nOfTrains = 4;
 	WINDOW** winPlatform;
-	int* people;
+	deque<int>* people;
+	Train** trains;
+	SignalLight* signalLight;
+
+	void addRandomTrain();
+
+	int getPlatform(int idx);
+	int getId(int idx);
+
+	void reportStatus();
 };
 
 

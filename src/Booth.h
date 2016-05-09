@@ -9,10 +9,12 @@
 #define BOOTH_H_
 
 #include <Graphics.h>
+#include <Platforms.h>
+#include <Queue.h>
 
 class Booth{
 public:
-	Booth(int id);
+	Booth(int id, WINDOW*& parent, Platforms* plat, Queue* que);
 	~Booth();
 
 protected:
@@ -20,6 +22,9 @@ private:
 	WINDOW* winBooth;
 	bool free;
 	int timerMS;
+
+	Platforms* platforms;
+	Queue* queue;
 
 	void reportStatus();
 };

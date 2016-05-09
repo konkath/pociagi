@@ -8,13 +8,12 @@
 #ifndef BOOTHS_H_
 #define BOOTHS_H_
 
-#include <curses.h>
 #include <Graphics.h>
 #include <Booth.h>
 
 class Booths{
 public:
-	Booths();
+	Booths(Platforms* plat, Queue* que);
 	~Booths();
 
 	void addBooth();
@@ -27,6 +26,8 @@ private:
 	int nOfBooths;
 
 	Booth** booths;
+	Platforms* platforms;
+	Queue* queue;
 };
 
 

@@ -7,7 +7,7 @@
 
 #include <Train.h>
 
-Train::Train(int platform, int id){
+Train::Train(SignalLight* signal, int platform, int id):signalLight(signal){
 	freeSeats = 30;
 	passengersOut = 0;
 
@@ -16,7 +16,6 @@ Train::Train(int platform, int id){
 	int lines = LINES * 0.5;
 	int columns = COLS * 0.08;
 
-	//TODO ustalic orgDistance na podstawie platform i id
 	int orgDistance = COLS * 0.48;
 
 	if (1 == platform){
@@ -30,17 +29,44 @@ Train::Train(int platform, int id){
 	Graphics::createWindow(winTrain, lines, columns,
 							LINES - lines, COLS - orgDistance );
 	Graphics::createBox(winTrain, '8', '!');
+
+	reportPassengers();
 }
 
-//TODO konstruktor losowego pociagu
-Train::Train(int platform, int id, int passengersOut, int freeSeats)
-		:passengersOut(passengersOut), freeSeats(freeSeats){
+//konstruktor losowego pociagu
+Train::Train(SignalLight* signal, int platform, int id, int passengersOut,
+		int freeSeats):signalLight(signal), freeSeats(freeSeats),
+		passengersOut(passengersOut){
 	timeoutMS = 500;
 
+	int lines = LINES * 0.5;
+	int columns = COLS * 0.08;
+
+	int orgDistance = COLS * 0.48;
+
+	if (1 == platform){
+		orgDistance += COLS * 0.30;
+	}
+
+	if (1 == id){
+		orgDistance += COLS * 0.2;
+	}
+
+	Graphics::createWindow(winTrain, lines, columns,
+							LINES - lines, COLS - orgDistance );
+	Graphics::createBox(winTrain, '8', '!');
+	reportPassengers();
 }
 
 Train::~Train(){
 	Graphics::deleteWindow(winTrain);
+}
+
+void Train::reportPassengers(){
+	//wysiadajacy
+	Graphics::showOnTop(winTrain, "wy: " + to_string(passengersOut));
+	//wolne miejsca
+	Graphics::showInMiddle(winTrain, "wo: " + to_string(freeSeats));
 }
 
 

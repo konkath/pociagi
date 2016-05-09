@@ -9,19 +9,23 @@
 #define SRC_TRAIN_H_
 
 #include <Graphics.h>
+#include <SignalLight.h>
 
 class Train{
 public:
-	Train(int platform, int id);
-	Train(int platform, int id, int passengersOut, int freeSeats);
+	Train(SignalLight* signal, int platform, int id);
+	Train(SignalLight* signal, int platform, int id, int passengersOut, int freeSeats);
 	~Train();
 protected:
 private:
 	WINDOW* winTrain;
+	SignalLight* signalLight;
 	int freeSeats;
 	int passengersOut;
 
 	int timeoutMS;
+
+	void reportPassengers();
 };
 
 

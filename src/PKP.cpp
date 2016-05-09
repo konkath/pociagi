@@ -19,6 +19,7 @@
 #include <Booths.h>
 #include <Platforms.h>
 #include <Train.h>
+#include <SignalLight.h>
 
 int main(void) {
 
@@ -31,6 +32,9 @@ int main(void) {
 		exit(EXIT_FAILURE);
     }
 
+    if(has_colors() == FALSE)
+    	exit(EXIT_FAILURE);
+
     //dont show user input
     cbreak();
     noecho();
@@ -38,21 +42,21 @@ int main(void) {
     //disable cursor
     curs_set(0);
 
+    //allow colors
+    start_color();
+    init_pair(1, COLOR_WHITE, COLOR_RED);
+    init_pair(2, COLOR_WHITE, COLOR_GREEN);
+
     mvaddstr(0, COLS/2, "PKP");
     refresh();
 
     Queue que = Queue();
-    Booths booths = Booths();
-    Platforms platforms = Platforms();
-    Train train1 = Train(0, 0);
-    Train train2 = Train(1, 0);
-    Train train3 = Train(0, 1);
-    Train train4 = Train(1, 1);
+    SignalLight signalLight = SignalLight();
+    Platforms platforms = Platforms(&signalLight);
+    Booths booths = Booths(&platforms, &que);
 
     int pressedKey = getch();
     while(pressedKey != 27 ){
-    	int x = 0;
-
     	switch(pressedKey)
     	{
     	//spacja dodanie ludzi do kolejki
@@ -67,24 +71,43 @@ int main(void) {
     	case 45:
     		booths.removeBooth();
     		break;
-    	// q pierwszy pociag od lewej
+    	// q dodanie pierwszy pociag od lewej
     	case 113:
-    		x = 1;
+    		platforms.addTrain(3);
     		break;
-    	// w drugi pociag od lewej
+    	// a usuniecie pierwszy pociag od lewej
+    	case 97:
+    		platforms.removeTrain(3);
+    		break;
+    	// w dodanie drugi pociag od lewej
     	case 119:
-    		x = 2;
+    		platforms.addTrain(2);
     		break;
-    	// e trzeci pociag od lewej
+    	// s usuniecie drugi pociag od lewej
+    	case 115:
+			platforms.removeTrain(2);
+			break;
+    	// e dodanie trzeci pociag od lewej
     	case 101:
-    		x = 3;
+    		platforms.addTrain(1);
     		break;
-    	// r czwarty pociag od lewej
+		// d usuniecie trzeci pociag od lewej
+    	case 100:
+			platforms.removeTrain(1);
+			break;
+    	// r dodanie czwarty pociag od lewej
     	case 114:
-    		x = 4;
+    		platforms.addTrain(0);
+    		break;
+		// f usuniecie czwarty pociag od lewej
+    	case 102:
+			platforms.removeTrain(0);
+			break;
+    	//enter zmiana swiatla
+    	case 10:
+    		signalLight.changeColor();
     		break;
     	}
-
 
     	pressedKey = getch();
     }

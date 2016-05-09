@@ -9,8 +9,8 @@
 
 Queue::Queue(){
 	people = 0;
-	int lines = LINES * 0.4;
-	int columns = COLS * 0.1;
+	int lines = LINES * 0.7;
+	int columns = COLS * 0.15;
 
 	Graphics::createWindow(queWindow, lines, columns, LINES - lines,
 							COLS - columns);
@@ -25,11 +25,11 @@ Queue::~Queue(){
 void Queue::addPeople(){
 	people++;
 
-	//tu nie ma bledu
 	Graphics::showInMiddle(queWindow, to_string(people));
 }
 
 void Queue::removePeople(){
 	people--;
+
 	Graphics::showInMiddle(queWindow, to_string(people));
 }

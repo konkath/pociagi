@@ -8,7 +8,7 @@
 #include <Booths.h>
 #include <iostream>
 
-Booths::Booths(){
+Booths::Booths(Platforms* plat, Queue* que):platforms(plat), queue(que){
 	nOfBooths = 0;
 	booths = new Booth*[maxBooths];
 
@@ -36,7 +36,7 @@ Booths::~Booths(){
 
 void Booths::addBooth(){
 	if (nOfBooths < maxBooths){
-		booths[nOfBooths] = new Booth(nOfBooths);
+		booths[nOfBooths] = new Booth(nOfBooths, winBooths, platforms, queue);
 		nOfBooths++;
 	}
 }
