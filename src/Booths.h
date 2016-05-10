@@ -28,6 +28,8 @@ private:
 	Booth** booths;
 	Platforms* platforms;
 	Queue* queue;
+
+	void deleteBooth(int idx);
 };
 
 

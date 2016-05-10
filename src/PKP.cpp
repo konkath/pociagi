@@ -50,71 +50,83 @@ int main(void) {
     mvaddstr(0, COLS/2, "PKP");
     refresh();
 
-    Queue que = Queue();
-    SignalLight signalLight = SignalLight();
-    Platforms platforms = Platforms(&signalLight);
-    Booths booths = Booths(&platforms, &que);
+    //TODO madrze to ustawic zeby obiekty zabijaly sie przed glownym oknem
+    if(true){
+		Queue que = Queue();
+		SignalLight signalLight = SignalLight();
+		Platforms platforms = Platforms(&signalLight);
+		Booths booths = Booths(&platforms, &que);
 
-    int pressedKey = getch();
-    while(pressedKey != 27 ){
-    	switch(pressedKey)
-    	{
-    	//spacja dodanie ludzi do kolejki
-    	case 32:
-    		que.addPeople();
-    		break;
-    	//+ dodanie budki z biletami
-    	case 43:
-    		booths.addBooth();
-    		break;
-    	//- usuniecie budki z biletami
-    	case 45:
-    		booths.removeBooth();
-    		break;
-    	// q dodanie pierwszy pociag od lewej
-    	case 113:
-    		platforms.addTrain(3);
-    		break;
-    	// a usuniecie pierwszy pociag od lewej
-    	case 97:
-    		platforms.removeTrain(3);
-    		break;
-    	// w dodanie drugi pociag od lewej
-    	case 119:
-    		platforms.addTrain(2);
-    		break;
-    	// s usuniecie drugi pociag od lewej
-    	case 115:
-			platforms.removeTrain(2);
-			break;
-    	// e dodanie trzeci pociag od lewej
-    	case 101:
-    		platforms.addTrain(1);
-    		break;
-		// d usuniecie trzeci pociag od lewej
-    	case 100:
-			platforms.removeTrain(1);
-			break;
-    	// r dodanie czwarty pociag od lewej
-    	case 114:
-    		platforms.addTrain(0);
-    		break;
-		// f usuniecie czwarty pociag od lewej
-    	case 102:
-			platforms.removeTrain(0);
-			break;
-    	//enter zmiana swiatla
-    	case 10:
-    		signalLight.changeColor();
-    		break;
-    	}
 
-    	pressedKey = getch();
+		pthread_mutex_lock(&graphicMutex);
+		int pressedKey = getch();
+		pthread_mutex_unlock(&graphicMutex);
+
+		while(pressedKey != 27 ){
+			switch(pressedKey)
+			{
+			//spacja dodanie ludzi do kolejki
+			case 32:
+				que.addPeople();
+				break;
+			//+ dodanie budki z biletami
+			case 43:
+				booths.addBooth();
+				break;
+			//- usuniecie budki z biletami
+			case 45:
+				booths.removeBooth();
+				break;
+			// q dodanie pierwszy pociag od lewej
+			case 113:
+				platforms.addTrain(3);
+				break;
+			// a usuniecie pierwszy pociag od lewej
+			case 97:
+				platforms.removeTrain(3);
+				break;
+			// w dodanie drugi pociag od lewej
+			case 119:
+				platforms.addTrain(2);
+				break;
+			// s usuniecie drugi pociag od lewej
+			case 115:
+				platforms.removeTrain(2);
+				break;
+			// e dodanie trzeci pociag od lewej
+			case 101:
+				platforms.addTrain(1);
+				break;
+			// d usuniecie trzeci pociag od lewej
+			case 100:
+				platforms.removeTrain(1);
+				break;
+			// r dodanie czwarty pociag od lewej
+			case 114:
+				platforms.addTrain(0);
+				break;
+			// f usuniecie czwarty pociag od lewej
+			case 102:
+				platforms.removeTrain(0);
+				break;
+			//enter zmiana swiatla
+			case 10:
+				signalLight.changeColor();
+				break;
+			}
+
+			pthread_mutex_lock(&graphicMutex);
+			pressedKey = getch();
+			pthread_mutex_unlock(&graphicMutex);
+		}
     }
 
     delwin(mainwin);
     endwin();
+	pthread_mutex_lock(&graphicMutex);
     refresh();
+	pthread_mutex_unlock(&graphicMutex);
+
 
     return EXIT_SUCCESS;
 }

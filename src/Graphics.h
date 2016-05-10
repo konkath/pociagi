@@ -10,7 +10,10 @@
 
 #include <curses.h>
 #include <string>
+#include <pthread.h>
 using namespace std;
+
+static pthread_mutex_t graphicMutex = PTHREAD_MUTEX_INITIALIZER;
 
 class Graphics{
 public:
@@ -24,8 +27,10 @@ public:
 	static void showInMiddle(WINDOW*& win, string txt);
 	static void showOnTop(WINDOW*& win, string txt);
 	static void showOnBottom(WINDOW*& win, string txt);
+
 protected:
 private:
+	static void refreshWin(WINDOW*& win);
 };
 
 

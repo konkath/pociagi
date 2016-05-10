@@ -28,7 +28,7 @@ Booths::~Booths(){
 	Graphics::deleteWindow(winBooths);
 
 	for(int i = 0; i < nOfBooths; ++i){
-		delete booths[i];
+		deleteBooth(i);
 	}
 
 	delete [] booths;
@@ -44,8 +44,19 @@ void Booths::addBooth(){
 void Booths::removeBooth(){
 	if(1 < nOfBooths){
 		nOfBooths--;
-		delete booths[nOfBooths];
-		booths[nOfBooths] = NULL;
+		deleteBooth(nOfBooths);
 	}
+}
+
+void Booths::deleteBooth(int idx){
+	booths[idx]->stopBooth();
+
+	//TODO przerobic na zmienna warunkowa
+	while(!booths[idx]->isStopped()){
+
+	}
+
+	delete booths[idx];
+	booths[idx] = NULL;
 }
 

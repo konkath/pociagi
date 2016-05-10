@@ -12,7 +12,9 @@ Booth::Booth(int id, WINDOW*& parent, Platforms* plat, Queue* que)
 			:platforms(plat), queue(que){
 	free = true;
 	stop = false;
-	timerMS = 5000;
+	stopped = true;
+
+	timerMS = 500;
 
 	int lines, columns;
 	getmaxyx(parent, lines, columns);
@@ -27,11 +29,17 @@ Booth::Booth(int id, WINDOW*& parent, Platforms* plat, Queue* que)
 }
 
 Booth::~Booth(){
-	stop = true;
-
-	pthread_join(queThread, NULL);
-
 	Graphics::deleteWindow(winBooth);
+}
+
+void Booth::stopBooth(){
+	pthread_mutex_lock(&stopMutex);
+	stop = true;
+	pthread_mutex_unlock(&stopMutex);
+}
+
+bool Booth::isStopped(){
+	return stopped;
 }
 
 void Booth::reportStatus(){
@@ -47,6 +55,11 @@ void* Booth::serve(void* me){
 
 	while(!thisThread->stop){
 		thisThread->queue->addPeople();
-		usleep(thisThread->timerMS);
+		usleep(thisThread->timerMS * 1000);
 	}
+
+
+	thisThread->stopped = true;
+
+	pthread_exit(NULL);
 }

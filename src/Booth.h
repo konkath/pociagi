@@ -18,14 +18,20 @@ public:
 	Booth(int id, WINDOW*& parent, Platforms* plat, Queue* que);
 	~Booth();
 
+	void stopBooth();
+	bool isStopped();
+
 protected:
 private:
 	WINDOW* winBooth;
 	bool free;
 	bool stop;
+	bool stopped;
+
 	int timerMS;
 
 	pthread_t queThread;
+	pthread_mutex_t stopMutex = PTHREAD_MUTEX_INITIALIZER;
 
 	Platforms* platforms;
 	Queue* queue;
