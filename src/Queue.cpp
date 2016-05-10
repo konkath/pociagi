@@ -23,13 +23,17 @@ Queue::~Queue(){
 
 
 void Queue::addPeople(){
+	pthread_mutex_lock(&peopleMutex);
 	people++;
+	pthread_mutex_unlock(&peopleMutex);
 
 	Graphics::showInMiddle(queWindow, to_string(people));
 }
 
 void Queue::removePeople(){
+	pthread_mutex_lock(&peopleMutex);
 	people--;
+	pthread_mutex_unlock(&peopleMutex);
 
 	Graphics::showInMiddle(queWindow, to_string(people));
 }

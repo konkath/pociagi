@@ -10,6 +10,7 @@
 
 #include <curses.h>
 #include <Graphics.h>
+#include <pthread.h>
 #include <string>
 using namespace std;
 
@@ -24,6 +25,8 @@ protected:
 private:
 	WINDOW* queWindow;
 	int people;
+
+	pthread_mutex_t peopleMutex = PTHREAD_MUTEX_INITIALIZER;
 };
 
 

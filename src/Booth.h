@@ -11,6 +11,7 @@
 #include <Graphics.h>
 #include <Platforms.h>
 #include <Queue.h>
+#include <unistd.h>
 
 class Booth{
 public:
@@ -21,12 +22,16 @@ protected:
 private:
 	WINDOW* winBooth;
 	bool free;
+	bool stop;
 	int timerMS;
+
+	pthread_t queThread;
 
 	Platforms* platforms;
 	Queue* queue;
 
 	void reportStatus();
+	static void* serve(void* me);
 };
 
 
