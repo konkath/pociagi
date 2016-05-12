@@ -24,9 +24,21 @@ public:
 protected:
 private:
 	WINDOW* queWindow;
+	int timerMS;
 	int people;
+	bool stop;
 
-	pthread_mutex_t peopleMutex = PTHREAD_MUTEX_INITIALIZER;
+	pthread_t queueThread;
+	pthread_mutex_t peopleMutex;
+	pthread_mutex_t stopMutex;
+	pthread_cond_t stopCond;
+
+	int queueLock();
+	int queueUnlock();
+	int stopLock();
+	int stopUnlock();
+
+	static void* populate(void* me);
 };
 
 

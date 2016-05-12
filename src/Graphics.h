@@ -11,6 +11,7 @@
 #include <curses.h>
 #include <string>
 #include <pthread.h>
+#include <unistd.h>
 using namespace std;
 
 static pthread_mutex_t graphicMutex = PTHREAD_MUTEX_INITIALIZER;
@@ -28,9 +29,11 @@ public:
 	static void showOnTop(WINDOW*& win, string txt);
 	static void showOnBottom(WINDOW*& win, string txt);
 
+	static int graphicLock();
+	static int graphicUnlock();
+
 protected:
 private:
-	static void refreshWin(WINDOW*& win);
 };
 
 

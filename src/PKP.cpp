@@ -42,6 +42,8 @@ int main(void) {
     //disable cursor
     curs_set(0);
 
+    nodelay(stdscr, TRUE);
+
     //allow colors
     start_color();
     init_pair(1, COLOR_WHITE, COLOR_RED);
@@ -57,10 +59,9 @@ int main(void) {
 		Platforms platforms = Platforms(&signalLight);
 		Booths booths = Booths(&platforms, &que);
 
-
-		pthread_mutex_lock(&graphicMutex);
+		Graphics::graphicLock();
 		int pressedKey = getch();
-		pthread_mutex_unlock(&graphicMutex);
+		Graphics::graphicUnlock();
 
 		while(pressedKey != 27 ){
 			switch(pressedKey)
@@ -115,18 +116,15 @@ int main(void) {
 				break;
 			}
 
-			pthread_mutex_lock(&graphicMutex);
+			Graphics::graphicLock();
 			pressedKey = getch();
-			pthread_mutex_unlock(&graphicMutex);
+			Graphics::graphicUnlock();
 		}
     }
 
     delwin(mainwin);
     endwin();
-	pthread_mutex_lock(&graphicMutex);
     refresh();
-	pthread_mutex_unlock(&graphicMutex);
-
 
     return EXIT_SUCCESS;
 }

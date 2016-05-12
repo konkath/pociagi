@@ -25,13 +25,13 @@ Booths::Booths(Platforms* plat, Queue* que):platforms(plat), queue(que){
 }
 
 Booths::~Booths(){
-	Graphics::deleteWindow(winBooths);
-
 	for(int i = 0; i < nOfBooths; ++i){
 		deleteBooth(i);
 	}
 
 	delete [] booths;
+
+	Graphics::deleteWindow(winBooths);
 }
 
 void Booths::addBooth(){
@@ -50,11 +50,6 @@ void Booths::removeBooth(){
 
 void Booths::deleteBooth(int idx){
 	booths[idx]->stopBooth();
-
-	//TODO przerobic na zmienna warunkowa
-	while(!booths[idx]->isStopped()){
-
-	}
 
 	delete booths[idx];
 	booths[idx] = NULL;

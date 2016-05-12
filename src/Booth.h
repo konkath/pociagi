@@ -11,7 +11,6 @@
 #include <Graphics.h>
 #include <Platforms.h>
 #include <Queue.h>
-#include <unistd.h>
 
 class Booth{
 public:
@@ -19,25 +18,26 @@ public:
 	~Booth();
 
 	void stopBooth();
-	bool isStopped();
-
 protected:
 private:
 	WINDOW* winBooth;
 	bool free;
 	bool stop;
-	bool stopped;
 
 	int timerMS;
 
 	pthread_t queThread;
-	pthread_mutex_t stopMutex = PTHREAD_MUTEX_INITIALIZER;
+	pthread_mutex_t stopMutex;
+	pthread_cond_t stopCond;
 
 	Platforms* platforms;
 	Queue* queue;
 
 	void reportStatus();
 	static void* serve(void* me);
+
+	int stopLock();
+	int stopUnlock();
 };
 
 

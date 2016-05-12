@@ -8,74 +8,113 @@
 #include <Graphics.h>
 #include <iostream>
 
-void Graphics::createWindow(WINDOW*& win, int nLines, int nColumns, int yStart, int xStart){
+void Graphics::createWindow(WINDOW*& win, int nLines, int nColumns,
+		int yStart, int xStart){
+
+	Graphics::graphicLock();
+
 	win = newwin(nLines, nColumns, yStart, xStart);
 	touchwin(win);
-	refreshWin(win);
+	wrefresh(win);
+
+	Graphics::graphicUnlock();
 }
 
 void Graphics::createDerWindow(WINDOW*& win, WINDOW*& parent,
 		int nLines, int nColumns, int yStart, int xStart){
 
+	Graphics::graphicLock();
+
 	win = derwin(parent, nLines, nColumns, yStart, xStart);
 	touchwin(win);
-	refreshWin(win);
+	wrefresh(win);
+
+	Graphics::graphicUnlock();
 }
 
 
 void Graphics::deleteWindow(WINDOW*& win){
+	Graphics::graphicLock();
+
 	//delete border as it likes to stay on screen
 	wborder(win, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
 	werase(win);
-	refreshWin(win);
+	wrefresh(win);
 
 	delwin(win);
-
-	pthread_mutex_lock(&graphicMutex);
+	win = NULL;
 	refresh();
-	pthread_mutex_unlock(&graphicMutex);
+
+	Graphics::graphicUnlock();
 }
 
 void Graphics::createBox(WINDOW*& win, chtype vertical, chtype horizontal){
-	box(win, vertical, horizontal);
+	Graphics::graphicLock();
 
-	refreshWin(win);
+	if (NULL != win){
+		box(win, vertical, horizontal);
+		wrefresh(win);
+	}
+
+	Graphics::graphicUnlock();
 }
 
 void Graphics::setColor(WINDOW*& win, int color){
-	wbkgd(win, COLOR_PAIR(color));
-	refreshWin(win);
+	Graphics::graphicLock();
+
+	if (NULL != win){
+		wbkgd(win, COLOR_PAIR(color));
+		wrefresh(win);
+	}
+
+	Graphics::graphicUnlock();
 }
 
 void Graphics::showInMiddle(WINDOW*& win, string txt){
 	int row, col;
-	getmaxyx(win, row, col);
 
-	mvwaddstr(win, row / 2, col / 2 - txt.length() / 2, txt.c_str());
+	Graphics::graphicLock();
 
-	refreshWin(win);
+	if (NULL != win){
+		getmaxyx(win, row, col);
+		mvwaddstr(win, row / 2, col / 2 - txt.length() / 2, txt.c_str());
+		wrefresh(win);
+	}
+
+	Graphics::graphicUnlock();
 }
 
 
 void Graphics::showOnTop(WINDOW*& win, string txt){
-	int col = getmaxx(win);
+	Graphics::graphicLock();
 
-	mvwaddstr(win, 2, col / 2 - txt.length() / 2, txt.c_str());
+	if (NULL != win){
+		int col = getmaxx(win);
+		mvwaddstr(win, 2, col / 2 - txt.length() / 2, txt.c_str());
+		wrefresh(win);
+	}
 
-	refreshWin(win);
+	Graphics::graphicUnlock();
 }
 
 void Graphics::showOnBottom(WINDOW*& win, string txt){
 	int row, col;
-	getmaxyx(win, row, col);
 
-	mvwaddstr(win, row - 2, col / 2 - txt.length() / 2, txt.c_str());
+	Graphics::graphicLock();
 
-	refreshWin(win);
+	if (NULL != win){
+		getmaxyx(win, row, col);
+		mvwaddstr(win, row - 2, col / 2 - txt.length() / 2, txt.c_str());
+		wrefresh(win);
+	}
+
+	Graphics::graphicUnlock();
 }
 
-void Graphics::refreshWin(WINDOW*& win){
-	pthread_mutex_lock(&graphicMutex);
-	wrefresh(win);
-	pthread_mutex_unlock(&graphicMutex);
+int Graphics::graphicLock(){
+	return pthread_mutex_lock(&graphicMutex);
+}
+
+int Graphics::graphicUnlock(){
+	return pthread_mutex_unlock(&graphicMutex);
 }
