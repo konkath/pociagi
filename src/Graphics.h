@@ -12,6 +12,7 @@
 #include <string>
 #include <pthread.h>
 #include <unistd.h>
+#include <Mutex.h>
 using namespace std;
 
 static pthread_mutex_t graphicMutex = PTHREAD_MUTEX_INITIALIZER;

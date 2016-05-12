@@ -12,12 +12,12 @@ Queue::Queue(){
 	stop = false;
 	timerMS = 200;
 
+	peopleMutex = new Mutex();
+	stopMutex = new Mutex();
+	pthread_cond_init(&stopCond, NULL);
+
 	int lines = LINES * 0.7;
 	int columns = COLS * 0.15;
-
-	pthread_mutex_init(&peopleMutex, NULL);
-	pthread_mutex_init(&stopMutex, NULL);
-	pthread_cond_init(&stopCond, NULL);
 
 	Graphics::createWindow(queWindow, lines, columns, LINES - lines,
 							COLS - columns);
@@ -27,50 +27,39 @@ Queue::Queue(){
 }
 
 Queue::~Queue(){
-	stopLock();
-	printf("lock na stop");
+	stopMutex->lock();
 	stop = true;
 	//wait for populate to finish
-
-	printf("czekam na cond");
-	pthread_cond_wait(&stopCond, &stopMutex);
-	printf("mam cond");
-	stopUnlock();
-
-	printf("idzie delete");
+	pthread_cond_wait(&stopCond, stopMutex->getMutex());
+	stopMutex->unlock();
 
 	Graphics::deleteWindow(queWindow);
 
-	pthread_mutex_destroy(&peopleMutex);
-	pthread_mutex_destroy(&stopMutex);
+	pthread_join(queueThread, NULL);
+
+	delete peopleMutex;
+	delete stopMutex;
 	pthread_cond_destroy(&stopCond);
 }
 
 
 void Queue::addPeople(){
-	queueLock();
+	peopleMutex->lock();
+	//queueLock();
 	people++;
 	string str = to_string(people);
-	queueUnlock();
+	peopleMutex->unlock();
 
 	Graphics::showInMiddle(queWindow, str);
 }
 
 void Queue::removePeople(){
-	queueLock();
+	peopleMutex->lock();
 	people--;
 	string str = to_string(people);
-	queueUnlock();
+	peopleMutex->unlock();
 
 	Graphics::showInMiddle(queWindow, str);
-}
-
-int Queue::queueLock(){
-	return pthread_mutex_lock(&peopleMutex);
-}
-
-int Queue::queueUnlock(){
-	return pthread_mutex_unlock(&peopleMutex);
 }
 
 void* Queue::populate(void *me){
@@ -82,25 +71,14 @@ void* Queue::populate(void *me){
 		thisThread->addPeople();
 		usleep(thisThread->timerMS * 1000);
 
-		thisThread->stopLock();
+		thisThread->stopMutex->lock();
 		isStopped = thisThread->stop;
-		thisThread->stopUnlock();
+		thisThread->stopMutex->unlock();
 	}
 
-	thisThread->stopLock();
-	printf("signal na cond");
+	thisThread->stopMutex->lock();
 	pthread_cond_signal(&thisThread->stopCond);
-	printf("po signale na cond");
-	thisThread->stopUnlock();
+	thisThread->stopMutex->unlock();
 
 	pthread_exit(NULL);
-}
-
-
-int Queue::stopLock(){
-	return pthread_mutex_lock(&stopMutex);
-}
-
-int Queue::stopUnlock(){
-	return pthread_mutex_unlock(&stopMutex);
 }

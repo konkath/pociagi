@@ -27,7 +27,7 @@ private:
 	int timerMS;
 
 	pthread_t queThread;
-	pthread_mutex_t stopMutex;
+	Mutex* stopMutex;
 	pthread_cond_t stopCond;
 
 	Platforms* platforms;
@@ -35,11 +35,6 @@ private:
 
 	void reportStatus();
 	static void* serve(void* me);
-
-	int stopLock();
-	int stopUnlock();
 };
-
-
 
 #endif /* BOOTH_H_ */

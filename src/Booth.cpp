@@ -13,7 +13,7 @@ Booth::Booth(int id, WINDOW*& parent, Platforms* plat, Queue* que)
 	free = true;
 	stop = false;
 
-	pthread_mutex_init(&stopMutex, NULL);
+	stopMutex = new Mutex();
 	pthread_cond_init(&stopCond, NULL);
 
 	timerMS = 500;
@@ -33,16 +33,18 @@ Booth::Booth(int id, WINDOW*& parent, Platforms* plat, Queue* que)
 Booth::~Booth(){
 	Graphics::deleteWindow(winBooth);
 
-	pthread_mutex_destroy(&stopMutex);
+	pthread_join(queThread, NULL);
+
+	delete stopMutex;
 	pthread_cond_destroy(&stopCond);
 }
 
 void Booth::stopBooth(){
-	stopLock();
+	stopMutex->lock();
 	stop = true;
 	//wait for serve to finish
-	pthread_cond_wait(&stopCond, &stopMutex);
-	stopUnlock();
+	pthread_cond_wait(&stopCond, stopMutex->getMutex());
+	stopMutex->unlock();
 }
 
 void Booth::reportStatus(){
@@ -62,23 +64,14 @@ void* Booth::serve(void* me){
 		thisThread->queue->addPeople();
 		usleep(thisThread->timerMS * 1000);
 
-		thisThread->stopLock();
+		thisThread->stopMutex->lock();
 		isStopped = thisThread->stop;
-		thisThread->stopUnlock();
+		thisThread->stopMutex->unlock();
 	}
 
-	thisThread->stopLock();
+	thisThread->stopMutex->lock();
 	pthread_cond_signal(&thisThread->stopCond);
-	thisThread->stopUnlock();
+	thisThread->stopMutex->unlock();
 
 	pthread_exit(NULL);
 }
-
-int Booth::stopLock(){
-	return pthread_mutex_lock(&stopMutex);
-}
-
-int Booth::stopUnlock(){
-	return pthread_mutex_unlock(&stopMutex);
-}
-

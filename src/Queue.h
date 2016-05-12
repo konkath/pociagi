@@ -29,14 +29,10 @@ private:
 	bool stop;
 
 	pthread_t queueThread;
-	pthread_mutex_t peopleMutex;
-	pthread_mutex_t stopMutex;
-	pthread_cond_t stopCond;
 
-	int queueLock();
-	int queueUnlock();
-	int stopLock();
-	int stopUnlock();
+	Mutex* peopleMutex;
+	Mutex* stopMutex;
+	pthread_cond_t stopCond;
 
 	static void* populate(void* me);
 };
