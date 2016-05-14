@@ -28,8 +28,16 @@ private:
 	Booth** booths;
 	Platforms* platforms;
 	Queue* queue;
+	Mutex* boothsMutex;
+
+	pthread_t addBoothThread, rmBoothThread;
 
 	void deleteBooth(int idx);
+
+	static void* boothAdder(void* me);
+	static void* boothRemover(void* me);
+
+	void waitForCond(pthread_cond_t cond);
 };
 
 

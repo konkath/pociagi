@@ -26,9 +26,7 @@ public:
 	static void createBox(WINDOW*& win, chtype vertical, chtype horizontal);
 	static void setColor(WINDOW*& win, int color);
 
-	static void showInMiddle(WINDOW*& win, string txt);
-	static void showOnTop(WINDOW*& win, string txt);
-	static void showOnBottom(WINDOW*& win, string txt);
+	static void showInMiddle(WINDOW*& win, string* txt, int nOfElements);
 
 	static int graphicLock();
 	static int graphicUnlock();

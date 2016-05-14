@@ -70,42 +70,25 @@ void Graphics::setColor(WINDOW*& win, int color){
 	Graphics::graphicUnlock();
 }
 
-void Graphics::showInMiddle(WINDOW*& win, string txt){
+void Graphics::showInMiddle(WINDOW*& win, string* txt, int nOfElements){
 	int row, col;
 
 	Graphics::graphicLock();
 
 	if (NULL != win){
+		printf("o ja jebie\n");
 		getmaxyx(win, row, col);
-		mvwaddstr(win, row / 2, col / 2 - txt.length() / 2, txt.c_str());
-		wrefresh(win);
-	}
-
-	Graphics::graphicUnlock();
-}
-
-
-void Graphics::showOnTop(WINDOW*& win, string txt){
-	Graphics::graphicLock();
-
-	if (NULL != win){
-		int col = getmaxx(win);
-		mvwaddstr(win, 2, col / 2 - txt.length() / 2, txt.c_str());
-		wrefresh(win);
-	}
-
-	Graphics::graphicUnlock();
-}
-
-void Graphics::showOnBottom(WINDOW*& win, string txt){
-	int row, col;
-
-	Graphics::graphicLock();
-
-	if (NULL != win){
-		getmaxyx(win, row, col);
-		mvwaddstr(win, row - 2, col / 2 - txt.length() / 2, txt.c_str());
-		wrefresh(win);
+		printf("o muj borze\n");
+		for (int i = 0; i < nOfElements; ++i){
+			printf("idz w chuj\n");
+			mvwaddstr(win,
+					(row / 2) - (nOfElements / 2 + i),
+					col / 2 - txt[i].length() / 2,
+					"a");
+			printf("u woot m8?\n");
+			wrefresh(win);
+			printf("lel\n");
+		}
 	}
 
 	Graphics::graphicUnlock();

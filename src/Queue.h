@@ -21,11 +21,16 @@ public:
 
 	void addPeople();
 	void removePeople();
+
+	bool isEmpty();
+
+	pthread_cond_t addCond, rmCond;
 protected:
 private:
 	WINDOW* queWindow;
 	int timerMS;
 	int people;
+	const int add = 20, rm = 10;
 	bool stop;
 
 	pthread_t queueThread;

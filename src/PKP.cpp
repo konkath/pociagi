@@ -54,9 +54,9 @@ int main(void) {
 
     //TODO madrze to ustawic zeby obiekty zabijaly sie przed glownym oknem
     if(true){
-		Queue que = Queue();
 		SignalLight signalLight = SignalLight();
 		Platforms platforms = Platforms(&signalLight);
+		Queue que = Queue();
 		Booths booths = Booths(&platforms, &que);
 
 		Graphics::graphicLock();

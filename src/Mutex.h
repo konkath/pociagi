@@ -12,7 +12,7 @@
 
 class Mutex{
 public:
-	Mutex();
+	Mutex(int type);
 	~Mutex();
 
 	int lock();
@@ -23,6 +23,7 @@ public:
 protected:
 private:
 	pthread_mutex_t mutex;
+	pthread_mutexattr_t attr;
 };
 
 

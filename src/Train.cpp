@@ -63,10 +63,10 @@ Train::~Train(){
 }
 
 void Train::reportPassengers(){
-	//wysiadajacy
-	Graphics::showOnTop(winTrain, "wy: " + to_string(passengersOut));
-	//wolne miejsca
-	Graphics::showInMiddle(winTrain, "wo: " + to_string(freeSeats));
+	//wysiadajacy + wolne miejsca
+	string str[2] = {"wy: " + to_string(passengersOut),
+			"ws: " + to_string(freeSeats)};
+	Graphics::showInMiddle(winTrain, str, 2);
 }
 
 

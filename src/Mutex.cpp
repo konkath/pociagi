@@ -7,13 +7,21 @@
 
 #include <Mutex.h>
 
+Mutex::Mutex(int type){
+	pthread_mutexattr_init(&attr);
 
-Mutex::Mutex(){
-	pthread_mutex_init(&mutex, NULL);
+	if (type == PTHREAD_MUTEX_RECURSIVE){
+		pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+	}else{
+		pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_DEFAULT);
+	}
+
+	pthread_mutex_init(&mutex, &attr);
 }
 
 Mutex::~Mutex(){
 	pthread_mutex_destroy(&mutex);
+	pthread_mutexattr_destroy(&attr);
 }
 
 int Mutex::lock(){

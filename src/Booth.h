@@ -11,6 +11,7 @@
 #include <Graphics.h>
 #include <Platforms.h>
 #include <Queue.h>
+#include <RandomGenerator.h>
 
 class Booth{
 public:
@@ -32,6 +33,7 @@ private:
 
 	Platforms* platforms;
 	Queue* queue;
+	RandomGenerator* randomGenerator;
 
 	void reportStatus();
 	static void* serve(void* me);
