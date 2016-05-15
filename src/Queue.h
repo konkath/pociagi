@@ -31,7 +31,7 @@ private:
 	WINDOW* queWindow;
 	int timerMS;
 	int people;
-	const int add = 20, rm = 10;
+	const int add = 20, rm = 5;
 	bool stop;
 
 	pthread_t queueThread;

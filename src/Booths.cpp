@@ -10,7 +10,6 @@
 
 Booths::Booths(Platforms* plat, Queue* que):platforms(plat), queue(que){
 	nOfBooths = 0;
-	booths = new Booth*[maxBooths];
 
 	stop = false;
 	int lines = LINES * 0.7;
@@ -37,8 +36,6 @@ Booths::~Booths(){
 	for(int i = 0; i < nOfBooths; ++i){
 		deleteBooth(i);
 	}
-
-	delete [] booths;
 
 	Graphics::deleteWindow(winBooths);
 }

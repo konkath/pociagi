@@ -7,10 +7,9 @@
 
 #include <Platforms.h>
 
-Platforms::Platforms(SignalLight* signal):signalLight(signal){
-	winPlatform = new WINDOW*[nOfPlatforms];
-
-	timerMS = 10000;
+Platforms::Platforms(SignalLight* signal, Queue* queue):signalLight(signal),
+	queue(queue){
+	timerMS = 3000;
 	stop = false;
 
 	int lines = LINES * 0.5;
@@ -24,12 +23,9 @@ Platforms::Platforms(SignalLight* signal):signalLight(signal){
 		Graphics::createBox(winPlatform[i], '|', '-');
 	}
 
-	people = new vector<int>[nOfPlatforms];
-	trains = new Train*[nOfTrains];
-
 	randomGenerator = new RandomGenerator();
 	peopleMutex = new Mutex(PTHREAD_MUTEX_DEFAULT);
-	trainMutex = new Mutex(PTHREAD_MUTEX_RECURSIVE);
+	trainMutex = new Mutex(PTHREAD_MUTEX_DEFAULT);
 
 	for(int i = 0; i < nOfPlatforms; ++i){
 		Graphics::createWindow(winPlatform[i], lines, columns, LINES - lines,
@@ -42,6 +38,7 @@ Platforms::Platforms(SignalLight* signal):signalLight(signal){
 	}
 
 	pthread_create(&trainThread, NULL, &Platforms::trainAdder, this);
+	pthread_create(&trainRmThread, NULL, &Platforms::trainRemover, this);
 }
 
 Platforms::~Platforms(){
@@ -50,21 +47,25 @@ Platforms::~Platforms(){
 	trainMutex->unlock();
 
 	pthread_join(trainThread, NULL);
+	pthread_join(trainRmThread, NULL);
+
+	trainMutex->lock();
+	for(int i = 0; i < nOfTrains; ++i){
+		if(NULL != trains[i]){
+			trains[i]->sendStop();
+		}
+		delete trains[i];
+	}
+
+	trainMutex->unlock();
 
 	for(int i = 0; i < nOfPlatforms; ++i){
 		Graphics::deleteWindow(winPlatform[i]);
 	}
 
-	for(int i = 0; i < nOfTrains; ++i){
-		delete trains[i];
-	}
-
 	delete trainMutex;
 	delete peopleMutex;
 	delete randomGenerator;
-	delete [] winPlatform;
-	delete [] people;
-	delete [] trains;
 }
 
 void Platforms::addPeople(int idx){
@@ -101,7 +102,7 @@ void Platforms::addTrain(int idx){
 	trainMutex->lock();
 
 	if (NULL == trains[idx]){
-		trains[idx] = new Train(signalLight, getPlatform(idx), getId(idx));
+		trains[idx] = new Train(signalLight, this, queue, idx);
 	}
 
 	trainMutex->unlock();
@@ -114,25 +115,29 @@ bool Platforms::addRandomTrain(int idx){
 	if (NULL == trains[idx]){
 		trainMutex->unlock();
 
-		int passOut = randomGenerator->getRandomInt(10, 20);
+		int passOut = randomGenerator->getRandomInt(0, 10);
 		int freeSeats = 30 - passOut;
 		result = true;
 
 		trainMutex->lock();
-		trains[idx] = new Train(signalLight, getPlatform(idx),
-				getId(idx), passOut, freeSeats);
+		trains[idx] = new Train(signalLight, this, queue, idx,
+								passOut, freeSeats);
 	}
 	trainMutex->unlock();
 
 	return result;
 }
 
+//version for user, where green light is checked only once
 void Platforms::removeTrain(int idx){
-	if (NULL != trains[idx]){
-		//TODO czekac na zielone swiatlo
+	trainMutex->lock();
+	if (NULL != trains[idx] && signalLight->isGreen()){
+		trains[idx]->sendStop();
+
 		delete trains[idx];
 		trains[idx] = NULL;
 	}
+	trainMutex->unlock();
 }
 
 int Platforms::getPlatform(int idx){
@@ -159,8 +164,8 @@ int Platforms::getTicketOwners(int platform, int id){
 
 void Platforms::reportStatus(int idx){
 	int platform = getPlatform(idx);
-	string str[2] = {"L: " + to_string(getTicketOwners(platform, 0)),
-					 "P: " + to_string(getTicketOwners(platform, 1))};
+	string str[2] = {"P: " + to_string(getTicketOwners(platform, 0)),
+					 "L: " + to_string(getTicketOwners(platform, 1))};
 
 	Graphics::showInMiddle(winPlatform[platform], str, 2);
 
@@ -169,28 +174,75 @@ void Platforms::reportStatus(int idx){
 void* Platforms::trainAdder(void* me){
 	Platforms* thisThread = static_cast<Platforms*>(me);
 
-	while(true){
-		thisThread->trainMutex->lock();
+	thisThread->trainMutex->lock();
 
-		for(int i = 0; i < thisThread->nOfTrains; ++i){
-			if(NULL == thisThread->trains[i]){
-				bool result = thisThread->addRandomTrain(i);
-
-				if(result){
-					thisThread->trainMutex->unlock();
-					usleep(thisThread->timerMS * 1000);
-					thisThread->trainMutex->lock();
-				}
-			}
-
-			if(thisThread->stop){
-				break;
-			}
+	for(int i = 0; i < thisThread->nOfTrains; ++i){
+		if(NULL == thisThread->trains[i]){
+			thisThread->trainMutex->unlock();
+			thisThread->addRandomTrain(i);
+			thisThread->trainMutex->lock();
 		}
+
+		usleep(thisThread->timerMS * 1000);
 
 		if(thisThread->stop){
 			thisThread->trainMutex->unlock();
-			break;
+			pthread_exit(NULL);;
+		}
+	}
+
+	while(true){
+		int rand = thisThread->randomGenerator->getRandomInt(0, 3);
+		if(NULL == thisThread->trains[rand]){
+			thisThread->trainMutex->unlock();
+
+			thisThread->addRandomTrain(rand);
+
+			thisThread->trainMutex->lock();
+		}
+
+		thisThread->trainMutex->unlock();
+
+		usleep(thisThread->timerMS * 1000);
+
+		thisThread->trainMutex->lock();
+
+		if(thisThread->stop){
+			thisThread->trainMutex->unlock();
+			pthread_exit(NULL);;
+		}
+	}
+
+	pthread_exit(NULL);
+}
+
+void* Platforms::trainRemover(void* me){
+	Platforms* thisThread = static_cast<Platforms*>(me);
+
+	while(true){
+		thisThread->signalLight->lightMutex->lock();
+		pthread_cond_wait(&thisThread->signalLight->lightCond, thisThread->signalLight->lightMutex->getMutex());
+		thisThread->signalLight->lightMutex->unlock();
+
+		thisThread->trainMutex->lock();
+		for(int i = 0; i < thisThread->nOfTrains; ++i){
+			if(NULL != thisThread->trains[i] && thisThread->trains[i]->isReady()){
+				thisThread->trainMutex->unlock();
+
+				thisThread->removeTrain(i);
+
+				thisThread->trainMutex->lock();
+			}
+		}
+		thisThread->trainMutex->unlock();
+
+		usleep(thisThread->timerMS * 1000);
+
+		thisThread->trainMutex->lock();
+
+		if(thisThread->stop){
+			thisThread->trainMutex->unlock();
+			pthread_exit(NULL);;
 		}
 
 		thisThread->trainMutex->unlock();

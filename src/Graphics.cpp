@@ -82,8 +82,8 @@ void Graphics::showInMiddle(WINDOW*& win, string* txt, int nOfElements){
 					(row / 2) - (nOfElements / 2 + i),
 					col / 2 - txt[i].length() / 2,
 					txt[i].c_str());
-			wrefresh(win);
 		}
+		wrefresh(win);
 	}
 
 	Graphics::graphicUnlock();

@@ -9,6 +9,7 @@
 #define SIGNALLIGHT_H_
 
 #include <Graphics.h>
+#include <Mutex.h>
 
 class SignalLight{
 public:
@@ -16,10 +17,24 @@ public:
 	~SignalLight();
 
 	void changeColor();
+	bool isGreen();
+
+	pthread_cond_t lightCond;
+	Mutex *lightMutex;
+
 protected:
 private:
 	WINDOW* winSignal;
-	bool greenLight;
+	bool greenLight, stop;
+	int redTimer, greenTimer;
+
+	pthread_t lightThread;
+	Mutex *stopMutex;
+
+	void setGreen();
+	void setRed();
+
+	static void* lightChanger(void* me);
 };
 
 

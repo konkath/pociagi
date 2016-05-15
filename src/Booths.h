@@ -22,11 +22,11 @@ public:
 protected:
 private:
 	WINDOW* winBooths;
-	const int maxBooths = 3;
+	static const int maxBooths = 3;
 	int nOfBooths;
 	bool stop;
 
-	Booth** booths;
+	Booth* booths[maxBooths];
 	Platforms* platforms;
 	Queue* queue;
 
