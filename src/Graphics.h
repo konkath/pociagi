@@ -15,7 +15,7 @@
 #include <Mutex.h>
 using namespace std;
 
-static pthread_mutex_t graphicMutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t graphicMutex;
 
 class Graphics{
 public:

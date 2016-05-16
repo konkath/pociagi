@@ -50,18 +50,18 @@ bool SignalLight::isGreen(){
 
 void SignalLight::changeColor(){
 	lightMutex->lock();
-	bool result = (greenLight = !greenLight);
-	lightMutex->unlock();
+	greenLight = !greenLight;
 
-	if(result){
-		Graphics::setColor(winSignal, 2);
-
-		lightMutex->lock();
+	if(greenLight){	//locked
 		pthread_cond_signal(&lightCond);
 		lightMutex->unlock();
+
+		Graphics::setColor(winSignal, 2);
 	}else{
+		lightMutex->unlock();
+
 		Graphics::setColor(winSignal, 1);
-	}
+	}//exit unlocked
 }
 
 void SignalLight::setGreen(){
@@ -83,9 +83,11 @@ void SignalLight::setRed(){
 void* SignalLight::lightChanger(void* me){
 	SignalLight* thisThread = static_cast<SignalLight*>(me);
 
-	while(true){
-		thisThread->setRed();
+	thisThread->stopMutex->lock();
+	while(!thisThread->stop){
+		thisThread->stopMutex->unlock();
 
+		thisThread->setRed();
 		usleep(thisThread->redTimer * 1000);
 
 		thisThread->stopMutex->lock();
@@ -96,6 +98,7 @@ void* SignalLight::lightChanger(void* me){
 		thisThread->stopMutex->unlock();
 
 		thisThread->setGreen();
+
 		thisThread->lightMutex->lock();
 		pthread_cond_signal(&thisThread->lightCond);
 		thisThread->lightMutex->unlock();
@@ -103,12 +106,8 @@ void* SignalLight::lightChanger(void* me){
 		usleep(thisThread->greenTimer * 1000);
 
 		thisThread->stopMutex->lock();
-		if(thisThread->stop){
-			thisThread->stopMutex->unlock();
-			pthread_exit(NULL);
-		}
-		thisThread->stopMutex->unlock();
-	}
+	}//exit locked
+	thisThread->stopMutex->unlock();
 
 	pthread_exit(NULL);
 }

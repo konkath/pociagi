@@ -14,7 +14,7 @@ Queue::Queue(){
 
 	peopleMutex = new Mutex(PTHREAD_MUTEX_DEFAULT);
 	stopMutex = new Mutex(PTHREAD_MUTEX_DEFAULT);
-	boothsMutex = new Mutex(PTHREAD_MUTEX_RECURSIVE);
+	boothsMutex = new Mutex(PTHREAD_MUTEX_DEFAULT);
 
 	pthread_cond_init(&stopCond, NULL);
 	pthread_cond_init(&addCond, NULL);
@@ -92,18 +92,16 @@ bool Queue::isEmpty(){
 void* Queue::populate(void *me){
 	Queue* thisThread = static_cast<Queue*>(me);
 
-	bool isStopped = false;
+	thisThread->stopMutex->lock();
+	while(!thisThread->stop){
+		thisThread->stopMutex->unlock();
 
-	while(!isStopped){
 		thisThread->addPeople();
 		usleep(thisThread->timerMS * 1000);
 
 		thisThread->stopMutex->lock();
-		isStopped = thisThread->stop;
-		thisThread->stopMutex->unlock();
-	}
+	}//exit locked
 
-	thisThread->stopMutex->lock();
 	pthread_cond_signal(&thisThread->stopCond);
 	thisThread->stopMutex->unlock();
 

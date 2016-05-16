@@ -43,8 +43,6 @@ Booth::~Booth(){
 void Booth::stopBooth(){
 	stopMutex->lock();
 	stop = true;
-	//wait for serve to finish
-	pthread_cond_wait(&stopCond, stopMutex->getMutex());
 	stopMutex->unlock();
 }
 
@@ -62,15 +60,16 @@ void Booth::reportStatus(){
 void* Booth::serve(void* me){
 	Booth* thisThread = static_cast<Booth*>(me);
 
-	bool isStopped = false;
+	thisThread->stopMutex->lock();
+	while(!thisThread->stop){
+		thisThread->stopMutex->unlock();
 
-	while(!isStopped){
 		thisThread->free = true;
+
 		if(thisThread->queue->isEmpty()){
 			thisThread->queue->removePeople();
 			thisThread->platforms->addPeople
 			(thisThread->randomGenerator->getRandomInt(0, 3));
-
 			thisThread->free = false;
 		}
 
@@ -78,12 +77,7 @@ void* Booth::serve(void* me){
 		usleep(thisThread->timerMS * 1000);
 
 		thisThread->stopMutex->lock();
-		isStopped = thisThread->stop;
-		thisThread->stopMutex->unlock();
-	}
-
-	thisThread->stopMutex->lock();
-	pthread_cond_signal(&thisThread->stopCond);
+	}//exit locked
 	thisThread->stopMutex->unlock();
 
 	pthread_exit(NULL);

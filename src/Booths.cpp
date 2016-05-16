@@ -63,32 +63,25 @@ void Booths::removeBooth(){
 }
 
 void Booths::deleteBooth(int idx){
-	queue->boothsMutex->lock();
-
+	//no need for mutex as it is held in removeBooth method
 	booths[idx]->stopBooth();
 	delete booths[idx];
 	booths[idx] = NULL;
-
-	queue->boothsMutex->unlock();
 }
 
 void* Booths::boothAdder(void* me){
 	Booths* thisThread = static_cast<Booths*>(me);
 
-	while(true){
-		thisThread->queue->boothsMutex->lock();
+	thisThread->queue->boothsMutex->lock();
+	while(!thisThread->stop){
 		pthread_cond_wait(&thisThread->queue->addCond,
 				thisThread->queue->boothsMutex->getMutex());
 
-		//check if thread should exit;
-		if(thisThread->stop){
-			thisThread->queue->boothsMutex->unlock();
-			break;
-		}
-
-		thisThread->addBooth();
 		thisThread->queue->boothsMutex->unlock();
-	}
+		thisThread->addBooth();
+		thisThread->queue->boothsMutex->lock();
+	}//exit locked
+	thisThread->queue->boothsMutex->unlock();
 
 	pthread_exit(NULL);
 }
@@ -96,20 +89,16 @@ void* Booths::boothAdder(void* me){
 void* Booths::boothRemover(void* me){
 	Booths* thisThread = static_cast<Booths*>(me);
 
-	while(true){
-		thisThread->queue->boothsMutex->lock();
+	thisThread->queue->boothsMutex->lock();
+	while(!thisThread->stop){
 		pthread_cond_wait(&thisThread->queue->rmCond,
 				thisThread->queue->boothsMutex->getMutex());
 
-		//check if thread should exit;
-		if(thisThread->stop){
-			thisThread->queue->boothsMutex->unlock();
-			break;
-		}
-
-		thisThread->removeBooth();
 		thisThread->queue->boothsMutex->unlock();
-	}
+		thisThread->removeBooth();
+		thisThread->queue->boothsMutex->lock();
+	}//exit locked
+	thisThread->queue->boothsMutex->unlock();
 
 	pthread_exit(NULL);
 }

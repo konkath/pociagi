@@ -175,43 +175,43 @@ void* Platforms::trainAdder(void* me){
 	Platforms* thisThread = static_cast<Platforms*>(me);
 
 	thisThread->trainMutex->lock();
-
 	for(int i = 0; i < thisThread->nOfTrains; ++i){
 		if(NULL == thisThread->trains[i]){
 			thisThread->trainMutex->unlock();
 			thisThread->addRandomTrain(i);
 			thisThread->trainMutex->lock();
-		}
-
-		usleep(thisThread->timerMS * 1000);
-
-		if(thisThread->stop){
-			thisThread->trainMutex->unlock();
-			pthread_exit(NULL);;
-		}
-	}
-
-	while(true){
-		int rand = thisThread->randomGenerator->getRandomInt(0, 3);
-		if(NULL == thisThread->trains[rand]){
-			thisThread->trainMutex->unlock();
-
-			thisThread->addRandomTrain(rand);
-
-			thisThread->trainMutex->lock();
-		}
+		}//exit locked
 
 		thisThread->trainMutex->unlock();
-
 		usleep(thisThread->timerMS * 1000);
-
 		thisThread->trainMutex->lock();
 
 		if(thisThread->stop){
 			thisThread->trainMutex->unlock();
 			pthread_exit(NULL);;
 		}
-	}
+	}//exit locked
+
+	while(!thisThread->stop){
+		thisThread->trainMutex->unlock();
+
+		int rand = thisThread->randomGenerator->getRandomInt(0, 3);
+
+		thisThread->trainMutex->lock();
+		if(NULL == thisThread->trains[rand]){
+			thisThread->trainMutex->unlock();
+
+			thisThread->addRandomTrain(rand);
+
+			thisThread->trainMutex->lock();
+		}//exit locked
+		thisThread->trainMutex->unlock();
+
+		usleep(thisThread->timerMS * 1000);
+
+		thisThread->trainMutex->lock();
+	}//exit locked
+	thisThread->trainMutex->unlock();
 
 	pthread_exit(NULL);
 }
@@ -219,7 +219,10 @@ void* Platforms::trainAdder(void* me){
 void* Platforms::trainRemover(void* me){
 	Platforms* thisThread = static_cast<Platforms*>(me);
 
-	while(true){
+	thisThread->trainMutex->lock();
+	while(!thisThread->stop){
+		thisThread->trainMutex->unlock();
+
 		thisThread->signalLight->lightMutex->lock();
 		pthread_cond_wait(&thisThread->signalLight->lightCond, thisThread->signalLight->lightMutex->getMutex());
 		thisThread->signalLight->lightMutex->unlock();
@@ -232,21 +235,15 @@ void* Platforms::trainRemover(void* me){
 				thisThread->removeTrain(i);
 
 				thisThread->trainMutex->lock();
-			}
-		}
+			}//exit locked
+		}//exit locked
 		thisThread->trainMutex->unlock();
 
 		usleep(thisThread->timerMS * 1000);
 
 		thisThread->trainMutex->lock();
-
-		if(thisThread->stop){
-			thisThread->trainMutex->unlock();
-			pthread_exit(NULL);;
-		}
-
-		thisThread->trainMutex->unlock();
-	}
+	}//exit locked
+	thisThread->trainMutex->unlock();
 
 	pthread_exit(NULL);
 }

@@ -20,6 +20,9 @@ public:
 	void removeBooth();
 
 protected:
+	Platforms* platforms;
+	Queue* queue;
+
 private:
 	WINDOW* winBooths;
 	static const int maxBooths = 3;
@@ -27,8 +30,6 @@ private:
 	bool stop;
 
 	Booth* booths[maxBooths];
-	Platforms* platforms;
-	Queue* queue;
 
 	pthread_t addBoothThread, rmBoothThread;
 
@@ -37,7 +38,6 @@ private:
 	static void* boothAdder(void* me);
 	static void* boothRemover(void* me);
 
-	void waitForCond(pthread_cond_t cond);
 	void stopThreads();
 };
 
