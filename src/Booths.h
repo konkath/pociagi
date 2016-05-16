@@ -1,10 +1,3 @@
-/*
- * Booths.h
- *
- *  Created on: 5 maj 2016
- *      Author: user
- */
-
 #ifndef BOOTHS_H_
 #define BOOTHS_H_
 

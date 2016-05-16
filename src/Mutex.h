@@ -1,10 +1,3 @@
-/*
- * Mutex.h
- *
- *  Created on: 12 maj 2016
- *      Author: user
- */
-
 #ifndef SRC_MUTEX_H_
 #define SRC_MUTEX_H_
 

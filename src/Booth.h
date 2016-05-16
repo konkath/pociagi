@@ -1,10 +1,3 @@
-/*
- * Booth.h
- *
- *  Created on: 5 maj 2016
- *      Author: user
- */
-
 #ifndef BOOTH_H_
 #define BOOTH_H_
 
@@ -21,16 +14,14 @@ public:
 	void stopBooth();
 protected:
 private:
-	Graphics* winBooth;
 	bool free;
 	bool stop;
-
 	int timerMS;
 
 	pthread_t queThread;
 	Mutex* stopMutex;
-	pthread_cond_t stopCond;
 
+	Graphics* winBooth;
 	Platforms* platforms;
 	Queue* queue;
 	RandomGenerator* randomGenerator;

@@ -1,10 +1,3 @@
-/*
- * RandomGenerator.h
- *
- *  Created on: 12 maj 2016
- *      Author: user
- */
-
 #ifndef SRC_RANDOMGENERATOR_H_
 #define SRC_RANDOMGENERATOR_H_
 

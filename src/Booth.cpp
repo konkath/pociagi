@@ -1,10 +1,3 @@
-/*
- * Booth.cpp
- *
- *  Created on: 5 maj 2016
- *      Author: user
- */
-
 #include <Booth.h>
 #include <iostream>
 
@@ -16,34 +9,36 @@ Booth::Booth(int id, WINDOW*& parent, Platforms* plat, Queue* que)
 
 	randomGenerator = new RandomGenerator();
 	stopMutex = new Mutex(PTHREAD_MUTEX_DEFAULT);
-	pthread_cond_init(&stopCond, NULL);
 
+	//initialize window
 	int lines, columns;
 	getmaxyx(parent, lines, columns);
-
 	winBooth = new Graphics(parent, (lines - 2) * 0.3, columns - 2,
 							1 + ((lines * 0.3) * id), 1, '#', '#');
 
 	reportStatus();
 
+	//create thread
 	pthread_create(&queThread, NULL, &Booth::serve, this);
 }
 
 Booth::~Booth(){
 	pthread_join(queThread, NULL);
-	pthread_cond_destroy(&stopCond);
 
 	delete winBooth;
 	delete randomGenerator;
 	delete stopMutex;
 }
 
+//send stop signal to thread
 void Booth::stopBooth(){
 	stopMutex->lock();
 	stop = true;
 	stopMutex->unlock();
 }
 
+//report current booth status
+//(no need for mutex as it is used for single thread only)
 void Booth::reportStatus(){
 	string str[1];
 	if(free){
@@ -55,6 +50,7 @@ void Booth::reportStatus(){
 	}
 }
 
+//main thread function
 void* Booth::serve(void* me){
 	Booth* thisThread = static_cast<Booth*>(me);
 
@@ -62,12 +58,17 @@ void* Booth::serve(void* me){
 	while(!thisThread->stop){
 		thisThread->stopMutex->unlock();
 
+		//report for user if booth did something or not
 		thisThread->free = true;
 
+		//if there are people in queue
 		if(thisThread->queue->isEmpty()){
+			//remove one
 			thisThread->queue->removePeople();
+			//add it to random platform
 			thisThread->platforms->addPeople
 			(thisThread->randomGenerator->getRandomInt(0, 3));
+			//booth did something
 			thisThread->free = false;
 		}
 

@@ -1,10 +1,3 @@
-/*
- * SignalLight.cpp
- *
- *  Created on: 9 maj 2016
- *      Author: user
- */
-
 #include <SignalLight.h>
 
 SignalLight::SignalLight(){
@@ -32,6 +25,8 @@ SignalLight::~SignalLight(){
 
 	pthread_join(lightThread, NULL);
 	pthread_cond_destroy(&lightCond);
+
+	winSignal->setColor(3);
 
 	delete winSignal;
 	delete lightMutex;

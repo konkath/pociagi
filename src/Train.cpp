@@ -1,10 +1,3 @@
-/*
- * Train.cpp
- *
- *  Created on: 8 maj 2016
- *      Author: user
- */
-
 #include <Train.h>
 
 Train::Train(SignalLight* signal, Platforms* platforms, Queue* queue, int idx)

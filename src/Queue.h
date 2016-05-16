@@ -1,10 +1,3 @@
-/*
- * Queu.h
- *
- *  Created on: 5 maj 2016
- *      Author: user
- */
-
 #ifndef QUEUE_H_
 #define QUEUE_H_
 

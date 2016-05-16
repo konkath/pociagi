@@ -1,10 +1,3 @@
-/*
- * Train.h
- *
- *  Created on: 8 maj 2016
- *      Author: user
- */
-
 #ifndef SRC_TRAIN_H_
 #define SRC_TRAIN_H_
 
@@ -48,7 +41,6 @@ private:
 	void reportPassengers();
 
 	static void* conductor(void* me);
-
 };
 
 

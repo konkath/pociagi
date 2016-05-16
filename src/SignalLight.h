@@ -1,10 +1,3 @@
-/*
- * SignalLight.h
- *
- *  Created on: 9 maj 2016
- *      Author: user
- */
-
 #ifndef SIGNALLIGHT_H_
 #define SIGNALLIGHT_H_
 

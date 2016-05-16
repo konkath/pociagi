@@ -1,10 +1,3 @@
-/*
- * Platforms.cpp
- *
- *  Created on: 7 maj 2016
- *      Author: user
- */
-
 #include <Platforms.h>
 
 Platforms::Platforms(SignalLight* signal, Queue* queue):signalLight(signal),
@@ -12,11 +5,13 @@ Platforms::Platforms(SignalLight* signal, Queue* queue):signalLight(signal),
 	timerMS = 3000;
 	stop = false;
 
+	//init graphic
 	int lines = LINES * 0.5;
 	int columns = COLS * 0.1;
 	int orgDistance = COLS * 0.6;
 	int distance = COLS * 0.30;
 
+	//window for each platform
 	for(int i = 0; i < nOfPlatforms; ++i){
 		winPlatform[i] = new Graphics(lines, columns, LINES - lines,
 								(COLS - orgDistance) - (i * distance), '|', '-');
@@ -30,6 +25,7 @@ Platforms::Platforms(SignalLight* signal, Queue* queue):signalLight(signal),
 		trains[i] = NULL;
 	}
 
+	//threads for adding and removing trains
 	pthread_create(&trainThread, NULL, &Platforms::trainAdder, this);
 	pthread_create(&trainRmThread, NULL, &Platforms::trainRemover, this);
 }
@@ -44,6 +40,7 @@ Platforms::~Platforms(){
 
 	for(int i = 0; i < nOfTrains; ++i){
 		if(NULL != trains[i]){
+			//stop train thread before calling destructor
 			trains[i]->sendStop();
 		}
 		delete trains[i];
@@ -58,6 +55,7 @@ Platforms::~Platforms(){
 	delete randomGenerator;
 }
 
+//add people to given platform
 void Platforms::addPeople(int idx){
 	int platform = getPlatform(idx), id = getId(idx);
 
@@ -68,6 +66,7 @@ void Platforms::addPeople(int idx){
 	reportStatus(idx);
 }
 
+//remove people from given platform
 bool Platforms::removePeople(int idx){
 	int platformId = getPlatform(idx), id = getId(idx);
 	bool result = false;
@@ -75,22 +74,26 @@ bool Platforms::removePeople(int idx){
 	peopleMutex->lock();
 	if (!people[platformId].empty()){
 		for(unsigned int i = 0; i < people[platformId].size(); ++i){
+			//look for people with correct ticket
 			if (people[platformId][i] == id){
+				//delete that person
 				people[platformId].erase(people[platformId].begin() + i);
 				result = true;
 				break;
 			}
 		}
-	}
+	}//exit locked
 	peopleMutex->unlock();
 
 	reportStatus(idx);
 	return result;
 }
 
+//add train without passengers
 void Platforms::addTrain(int idx){
 	trainMutex->lock();
 
+	//check if train exists
 	if (NULL == trains[idx]){
 		trains[idx] = new Train(signalLight, this, queue, idx);
 	}
@@ -98,6 +101,7 @@ void Platforms::addTrain(int idx){
 	trainMutex->unlock();
 }
 
+//add train with random number of passengers in it
 bool Platforms::addRandomTrain(int idx){
 	bool result = false;
 
@@ -105,6 +109,7 @@ bool Platforms::addRandomTrain(int idx){
 	if (NULL == trains[idx]){
 		trainMutex->unlock();
 
+		//no need to block that
 		int passOut = randomGenerator->getRandomInt(0, 10);
 		int freeSeats = 30 - passOut;
 		result = true;
@@ -112,7 +117,7 @@ bool Platforms::addRandomTrain(int idx){
 		trainMutex->lock();
 		trains[idx] = new Train(signalLight, this, queue, idx,
 								passOut, freeSeats);
-	}
+	}//exit blocked
 	trainMutex->unlock();
 
 	return result;
@@ -122,6 +127,7 @@ bool Platforms::addRandomTrain(int idx){
 void Platforms::removeTrain(int idx){
 	trainMutex->lock();
 	if (NULL != trains[idx] && signalLight->isGreen()){
+		//kill thread
 		trains[idx]->sendStop();
 
 		delete trains[idx];
@@ -130,19 +136,23 @@ void Platforms::removeTrain(int idx){
 	trainMutex->unlock();
 }
 
+//platforms have id 0 (right) and 1 (left) of window
 int Platforms::getPlatform(int idx){
 	return idx < 2 ? 0 : 1;
 }
 
+//trains have id 0 (right) and 1 (left) of platform
 int Platforms::getId(int idx){
 	return idx % 2 ? 1 : 0;
 }
 
+//count people with given ticket information
 int Platforms::getTicketOwners(int platform, int id){
 	int count = 0;
 
 	peopleMutex->lock();
 	for (unsigned int i = 0; i < people[platform].size(); ++i){
+		//check if ticket is correct
 		if(people[platform][i] == id){
 			count++;
 		}
@@ -152,18 +162,20 @@ int Platforms::getTicketOwners(int platform, int id){
 	return count;
 }
 
+//report number of people on platform
 void Platforms::reportStatus(int idx){
 	int platform = getPlatform(idx);
 	string str[2] = {"P: " + to_string(getTicketOwners(platform, 0)),
 					 "L: " + to_string(getTicketOwners(platform, 1))};
 
 	winPlatform[platform]->showInMiddle(str, 2);
-
 }
 
+//main thread function for adding random trains
 void* Platforms::trainAdder(void* me){
 	Platforms* thisThread = static_cast<Platforms*>(me);
 
+	//start of adding train for each of platforms
 	thisThread->trainMutex->lock();
 	for(int i = 0; i < thisThread->nOfTrains; ++i){
 		if(NULL == thisThread->trains[i]){

@@ -1,10 +1,3 @@
-/*
- * RandomGenerator.cpp
- *
- *  Created on: 12 maj 2016
- *      Author: user
- */
-
 #include <RandomGenerator.h>
 
 RandomGenerator::RandomGenerator(){
