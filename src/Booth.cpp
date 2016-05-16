@@ -21,9 +21,8 @@ Booth::Booth(int id, WINDOW*& parent, Platforms* plat, Queue* que)
 	int lines, columns;
 	getmaxyx(parent, lines, columns);
 
-	Graphics::createDerWindow(winBooth, parent, (lines - 2) * 0.3, columns - 2,
-							1 + ((lines * 0.3) * id), 1);
-	Graphics::createBox(winBooth, '#', '#');
+	winBooth = new Graphics(parent, (lines - 2) * 0.3, columns - 2,
+							1 + ((lines * 0.3) * id), 1, '#', '#');
 
 	reportStatus();
 
@@ -31,13 +30,12 @@ Booth::Booth(int id, WINDOW*& parent, Platforms* plat, Queue* que)
 }
 
 Booth::~Booth(){
-	Graphics::deleteWindow(winBooth);
-
 	pthread_join(queThread, NULL);
+	pthread_cond_destroy(&stopCond);
 
+	delete winBooth;
 	delete randomGenerator;
 	delete stopMutex;
-	pthread_cond_destroy(&stopCond);
 }
 
 void Booth::stopBooth(){
@@ -50,10 +48,10 @@ void Booth::reportStatus(){
 	string str[1];
 	if(free){
 		str[0] = "W";
-		Graphics::showInMiddle(winBooth, str, 1);
+		winBooth->showInMiddle(str, 1);
 	}else{
 		str[0] = "Z";
-		Graphics::showInMiddle(winBooth, str, 1);
+		winBooth->showInMiddle(str, 1);
 	}
 }
 

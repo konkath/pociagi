@@ -18,20 +18,13 @@ Platforms::Platforms(SignalLight* signal, Queue* queue):signalLight(signal),
 	int distance = COLS * 0.30;
 
 	for(int i = 0; i < nOfPlatforms; ++i){
-		Graphics::createWindow(winPlatform[i], lines, columns, LINES - lines,
-								(COLS - orgDistance) - (i * distance));
-		Graphics::createBox(winPlatform[i], '|', '-');
+		winPlatform[i] = new Graphics(lines, columns, LINES - lines,
+								(COLS - orgDistance) - (i * distance), '|', '-');
 	}
 
 	randomGenerator = new RandomGenerator();
 	peopleMutex = new Mutex(PTHREAD_MUTEX_DEFAULT);
 	trainMutex = new Mutex(PTHREAD_MUTEX_DEFAULT);
-
-	for(int i = 0; i < nOfPlatforms; ++i){
-		Graphics::createWindow(winPlatform[i], lines, columns, LINES - lines,
-								(COLS - orgDistance) - (i * distance));
-		Graphics::createBox(winPlatform[i], '|', '-');
-	}
 
 	for(int i = 0; i < nOfTrains; ++i){
 		trains[i] = NULL;
@@ -49,7 +42,6 @@ Platforms::~Platforms(){
 	pthread_join(trainThread, NULL);
 	pthread_join(trainRmThread, NULL);
 
-	trainMutex->lock();
 	for(int i = 0; i < nOfTrains; ++i){
 		if(NULL != trains[i]){
 			trains[i]->sendStop();
@@ -57,10 +49,8 @@ Platforms::~Platforms(){
 		delete trains[i];
 	}
 
-	trainMutex->unlock();
-
 	for(int i = 0; i < nOfPlatforms; ++i){
-		Graphics::deleteWindow(winPlatform[i]);
+		delete winPlatform[i];
 	}
 
 	delete trainMutex;
@@ -167,7 +157,7 @@ void Platforms::reportStatus(int idx){
 	string str[2] = {"P: " + to_string(getTicketOwners(platform, 0)),
 					 "L: " + to_string(getTicketOwners(platform, 1))};
 
-	Graphics::showInMiddle(winPlatform[platform], str, 2);
+	winPlatform[platform]->showInMiddle(str, 2);
 
 }
 

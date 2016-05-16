@@ -28,7 +28,7 @@ public:
 	Mutex* boothsMutex;
 protected:
 private:
-	WINDOW* queWindow;
+	Graphics* queWindow;
 	int timerMS;
 	int people;
 	const int add = 20, rm = 5;

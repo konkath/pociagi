@@ -21,7 +21,7 @@ public:
 	void stopBooth();
 protected:
 private:
-	WINDOW* winBooth;
+	Graphics* winBooth;
 	bool free;
 	bool stop;
 

@@ -19,20 +19,26 @@ static pthread_mutex_t graphicMutex;
 
 class Graphics{
 public:
-	static void createWindow(WINDOW*& win, int nLines, int nColumns, int yStart, int xStart);
-	static void createDerWindow(WINDOW*& win, WINDOW*& parent, int nLines, int nColumns, int yStart, int xStart);
-	static void deleteWindow(WINDOW*& win);
-
-	static void createBox(WINDOW*& win, chtype vertical, chtype horizontal);
-	static void setColor(WINDOW*& win, int color);
-
-	static void showInMiddle(WINDOW*& win, string* txt, int nOfElements);
+	Graphics(int nLines, int nColumns, int yStart, int xStart,
+			chtype vertical, chtype horizontal);
+	Graphics(WINDOW*& win, int nLines, int nColumns, int yStart, int xStart,
+			chtype vertical, chtype horizontal);
+	~Graphics();
 
 	static int graphicLock();
 	static int graphicUnlock();
 
+	void setColor(int color);
+	void showInMiddle(string* txt, int nOfElements);
+
+	WINDOW*& getWin();
+
 protected:
 private:
+	WINDOW* win;
+	chtype vertical, horizontal;
+
+	void createBox();
 };
 
 

@@ -24,7 +24,7 @@ public:
 
 protected:
 private:
-	WINDOW* winSignal;
+	Graphics* winSignal;
 	bool greenLight, stop;
 	int redTimer, greenTimer;
 

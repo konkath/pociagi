@@ -8,9 +8,23 @@
 #include <Graphics.h>
 #include <iostream>
 
-void Graphics::createWindow(WINDOW*& win, int nLines, int nColumns,
-		int yStart, int xStart){
+int Graphics::graphicLock(){
+	return pthread_mutex_lock(&graphicMutex);
+}
 
+int Graphics::graphicUnlock(){
+	return pthread_mutex_unlock(&graphicMutex);
+}
+
+WINDOW*& Graphics::getWin(){
+	return win;
+}
+
+//---------------------------------------------------
+
+Graphics::Graphics(int nLines, int nColumns, int yStart, int xStart,
+					chtype vertical, chtype horizontal):vertical(vertical),
+					horizontal(horizontal){
 	Graphics::graphicLock();
 
 	win = newwin(nLines, nColumns, yStart, xStart);
@@ -18,11 +32,13 @@ void Graphics::createWindow(WINDOW*& win, int nLines, int nColumns,
 	wrefresh(win);
 
 	Graphics::graphicUnlock();
+
+	createBox();
 }
 
-void Graphics::createDerWindow(WINDOW*& win, WINDOW*& parent,
-		int nLines, int nColumns, int yStart, int xStart){
-
+Graphics::Graphics(WINDOW*& parent, int nLines, int nColumns, int yStart,
+					int xStart, chtype vertical, chtype horizontal)
+					:vertical(vertical), horizontal(horizontal){
 	Graphics::graphicLock();
 
 	win = derwin(parent, nLines, nColumns, yStart, xStart);
@@ -30,10 +46,11 @@ void Graphics::createDerWindow(WINDOW*& win, WINDOW*& parent,
 	wrefresh(win);
 
 	Graphics::graphicUnlock();
+
+	createBox();
 }
 
-
-void Graphics::deleteWindow(WINDOW*& win){
+Graphics::~Graphics(){
 	Graphics::graphicLock();
 
 	//delete border as it likes to stay on screen
@@ -46,53 +63,42 @@ void Graphics::deleteWindow(WINDOW*& win){
 	refresh();
 
 	Graphics::graphicUnlock();
+
 }
 
-void Graphics::createBox(WINDOW*& win, chtype vertical, chtype horizontal){
+void Graphics::createBox(){
 	Graphics::graphicLock();
 
-	if (NULL != win){
-		box(win, vertical, horizontal);
-		wrefresh(win);
-	}
+	box(win, vertical, horizontal);
+	wrefresh(win);
 
 	Graphics::graphicUnlock();
 }
 
-void Graphics::setColor(WINDOW*& win, int color){
+void Graphics::setColor(int color){
 	Graphics::graphicLock();
 
-	if (NULL != win){
-		wbkgd(win, COLOR_PAIR(color));
-		wrefresh(win);
-	}
+	wbkgd(win, COLOR_PAIR(color));
+	wrefresh(win);
 
 	Graphics::graphicUnlock();
 }
 
-void Graphics::showInMiddle(WINDOW*& win, string* txt, int nOfElements){
+void Graphics::showInMiddle(string* txt, int nOfElements){
 	int row, col;
 
 	Graphics::graphicLock();
 
-	if (NULL != win){
-		getmaxyx(win, row, col);
-		for (int i = 0; i < nOfElements; ++i){
-			mvwaddstr(win,
-					(row / 2) - (nOfElements / 2 + i),
-					col / 2 - txt[i].length() / 2,
-					txt[i].c_str());
-		}
-		wrefresh(win);
+	werase(win);
+	getmaxyx(win, row, col);
+	for (int i = 0; i < nOfElements; ++i){
+		mvwaddstr(win,
+				(row / 2) - (nOfElements / 2 + i),
+				col / 2 - txt[i].length() / 2,
+				txt[i].c_str());
 	}
 
 	Graphics::graphicUnlock();
-}
 
-int Graphics::graphicLock(){
-	return pthread_mutex_lock(&graphicMutex);
-}
-
-int Graphics::graphicUnlock(){
-	return pthread_mutex_unlock(&graphicMutex);
+	createBox();
 }

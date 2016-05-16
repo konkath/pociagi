@@ -32,8 +32,7 @@ Train::Train(SignalLight* signal, Platforms* platforms, Queue* queue, int idx,
 Train::~Train(){
 	pthread_join(trainThread, NULL);
 
-	Graphics::deleteWindow(winTrain);
-
+	delete winTrain;
 	delete passengersMutex;
 	delete seatsMutex;
 	delete statusMutex;
@@ -77,9 +76,8 @@ void Train::initGraphic(int idx){
 		orgDistance += COLS * 0.2;
 	}
 
-	Graphics::createWindow(winTrain, lines, columns,
-							LINES - lines, COLS - orgDistance );
-	Graphics::createBox(winTrain, '8', '!');
+	winTrain = new Graphics(lines, columns,	LINES - lines, COLS - orgDistance,
+			'8', '!');
 
 	timeoutMS = 100;
 	status = "R";
@@ -103,7 +101,7 @@ void Train::reportPassengers(){
 	str[2] = status;
 	statusMutex->unlock();
 
-	Graphics::showInMiddle(winTrain, str, 3);
+	winTrain->showInMiddle(str, 3);
 }
 
 void* Train::conductor(void* me){

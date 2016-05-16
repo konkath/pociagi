@@ -15,9 +15,8 @@ SignalLight::SignalLight(){
 	int lines = LINES * 0.1;
 	int columns = COLS * 0.6;
 
-	Graphics::createWindow(winSignal, lines, columns, 2, 2);
-	Graphics::createBox(winSignal, '+', '+');
-	Graphics::setColor(winSignal, 1);
+	winSignal = new Graphics(lines, columns, 2, 2, '+', '+');
+	winSignal->setColor(1);
 
 	lightMutex = new Mutex(PTHREAD_MUTEX_DEFAULT);
 	stopMutex = new Mutex(PTHREAD_MUTEX_DEFAULT);
@@ -32,12 +31,11 @@ SignalLight::~SignalLight(){
 	stopMutex->unlock();
 
 	pthread_join(lightThread, NULL);
+	pthread_cond_destroy(&lightCond);
 
-	Graphics::deleteWindow(winSignal);
-
+	delete winSignal;
 	delete lightMutex;
 	delete stopMutex;
-	pthread_cond_destroy(&lightCond);
 }
 
 bool SignalLight::isGreen(){
@@ -49,27 +47,20 @@ bool SignalLight::isGreen(){
 }
 
 void SignalLight::changeColor(){
-	lightMutex->lock();
-	greenLight = !greenLight;
-
-	if(greenLight){	//locked
-		pthread_cond_signal(&lightCond);
-		lightMutex->unlock();
-
-		Graphics::setColor(winSignal, 2);
+	if(greenLight){
+		setRed();
 	}else{
-		lightMutex->unlock();
-
-		Graphics::setColor(winSignal, 1);
-	}//exit unlocked
+		setGreen();
+	}
 }
 
 void SignalLight::setGreen(){
 	lightMutex->lock();
 	greenLight = true;
+	pthread_cond_signal(&lightCond);
 	lightMutex->unlock();
 
-	Graphics::setColor(winSignal, 2);
+	winSignal->setColor(2);
 }
 
 void SignalLight::setRed(){
@@ -77,7 +68,7 @@ void SignalLight::setRed(){
 	greenLight = false;
 	lightMutex->unlock();
 
-	Graphics::setColor(winSignal, 1);
+	winSignal->setColor(1);
 }
 
 void* SignalLight::lightChanger(void* me){
@@ -98,11 +89,6 @@ void* SignalLight::lightChanger(void* me){
 		thisThread->stopMutex->unlock();
 
 		thisThread->setGreen();
-
-		thisThread->lightMutex->lock();
-		pthread_cond_signal(&thisThread->lightCond);
-		thisThread->lightMutex->unlock();
-
 		usleep(thisThread->greenTimer * 1000);
 
 		thisThread->stopMutex->lock();

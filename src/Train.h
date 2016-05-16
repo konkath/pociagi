@@ -28,7 +28,7 @@ public:
 
 protected:
 private:
-	WINDOW* winTrain;
+	Graphics* winTrain;
 	SignalLight* signalLight;
 	Platforms* platforms;
 	Queue* queue;

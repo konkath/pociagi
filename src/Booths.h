@@ -20,15 +20,15 @@ public:
 	void removeBooth();
 
 protected:
-	Platforms* platforms;
-	Queue* queue;
 
 private:
-	WINDOW* winBooths;
 	static const int maxBooths = 3;
 	int nOfBooths;
 	bool stop;
 
+	Graphics* winBooths;
+	Platforms* platforms;
+	Queue* queue;
 	Booth* booths[maxBooths];
 
 	pthread_t addBoothThread, rmBoothThread;

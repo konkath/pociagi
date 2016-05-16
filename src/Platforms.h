@@ -36,7 +36,7 @@ protected:
 private:
 	static const int nOfPlatforms = 2;
 	static const int nOfTrains = 4;
-	WINDOW* winPlatform[nOfPlatforms];
+	Graphics* winPlatform[nOfPlatforms];
 	vector<int> people[nOfPlatforms];
 	Train* trains[nOfTrains];
 	SignalLight* signalLight;

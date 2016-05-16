@@ -52,10 +52,10 @@ int main(void) {
     mvaddstr(0, COLS/2, "PKP");
     refresh();
 
+	pthread_mutex_init(&graphicMutex, NULL);
+
     //TODO madrze to ustawic zeby obiekty zabijaly sie przed glownym oknem
     if(true){
-    	pthread_mutex_init(&graphicMutex, NULL);
-
 		SignalLight signalLight = SignalLight();
 		Queue que = Queue();
 		Platforms platforms = Platforms(&signalLight, &que);
@@ -122,9 +122,8 @@ int main(void) {
 			pressedKey = getch();
 			Graphics::graphicUnlock();
 		}
-
-		pthread_mutex_destroy(&graphicMutex);
     }
+	pthread_mutex_destroy(&graphicMutex);
 
     delwin(mainwin);
     endwin();

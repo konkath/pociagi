@@ -23,9 +23,7 @@ Queue::Queue(){
 	int lines = LINES * 0.7;
 	int columns = COLS * 0.15;
 
-	Graphics::createWindow(queWindow, lines, columns, LINES - lines,
-							COLS - columns);
-	Graphics::createBox(queWindow, '$', '$');
+	queWindow = new Graphics(lines, columns, LINES - lines, COLS - columns, '$', '$');
 
 	pthread_create(&queueThread, NULL, &Queue::populate, this);
 }
@@ -37,10 +35,9 @@ Queue::~Queue(){
 	pthread_cond_wait(&stopCond, stopMutex->getMutex());
 	stopMutex->unlock();
 
-	Graphics::deleteWindow(queWindow);
-
 	pthread_join(queueThread, NULL);
 
+	delete queWindow;
 	delete boothsMutex;
 	delete peopleMutex;
 	delete stopMutex;
@@ -62,7 +59,7 @@ void Queue::addPeople(){
 	}
 	peopleMutex->unlock();
 
-	Graphics::showInMiddle(queWindow, str, 1);
+	queWindow->showInMiddle(str, 1);
 }
 
 void Queue::removePeople(){
@@ -78,7 +75,7 @@ void Queue::removePeople(){
 
 	peopleMutex->unlock();
 
-	Graphics::showInMiddle(queWindow, str, 1);
+	queWindow->showInMiddle(str, 1);
 }
 
 bool Queue::isEmpty(){

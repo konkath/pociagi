@@ -16,9 +16,8 @@ Booths::Booths(Platforms* plat, Queue* que):platforms(plat), queue(que){
 	int columns = COLS * 0.2;
 	int orgDistance = COLS * 0.35;
 
-	Graphics::createWindow(winBooths, lines, columns, LINES - lines,
-							COLS - orgDistance );
-	Graphics::createBox(winBooths, '*', '*');
+	winBooths = new Graphics(lines, columns, LINES - lines,
+							COLS - orgDistance, '*', '*');
 
 	//start with single booth open
 	addBooth();
@@ -37,14 +36,14 @@ Booths::~Booths(){
 		deleteBooth(i);
 	}
 
-	Graphics::deleteWindow(winBooths);
+	delete winBooths;
 }
 
 void Booths::addBooth(){
 	queue->boothsMutex->lock();
 
 	if (nOfBooths < maxBooths){
-		booths[nOfBooths] = new Booth(nOfBooths, winBooths, platforms, queue);
+		booths[nOfBooths] = new Booth(nOfBooths, winBooths->getWin(), platforms, queue);
 		nOfBooths++;
 	}
 
